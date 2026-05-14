@@ -1,0 +1,58 @@
+/* 날짜 그리드: 42칸을 7×6으로 */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 130px;
+}
+
+.day {
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 13px;
+  background: white;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.day:nth-child(7n) {
+  border-right: none;
+}
+
+.day.out {
+  background: #fafafa;
+  color: #cbd5e1;
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 8px 4px;
+  gap: 6px;
+}
+
+.day-main {
+  flex: 1;
+  min-height: 0;
+  padding: 0 6px 8px;
+  overflow-y: auto;
+}
+
+.day-num:hover {
+  cursor: pointer;
+  color:blue;
+}
+
+.day-weather {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.day-weather-icon {
+  line-height: 1;
+}

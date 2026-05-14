@@ -1,0 +1,26 @@
+.day-perf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  height: 100%;
+  min-height: 0;
+}
+
+.perf-item {
+  border: 1px solid #65656555;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.perf-item:hover {
+  color: blue;
+}
+
+.perf-more {
+  cursor: pointer;
+}
+
+.perf-more:hover {
+  color: blue;
+}
