@@ -14,6 +14,7 @@ export function createSidebar(container, options = {}) {
   // 부모가 넘겨주는 콜백 - 필터가 바뀔 때마다 호출됨
   const onChange = options.onChange || (() => {});
   let locationOptions = [];
+  const layout = container.closest('.layout');
 
   // 내부 상태 - 현재 선택된 필터들
   const filters = {
@@ -26,56 +27,73 @@ export function createSidebar(container, options = {}) {
 
   // === HTML 그리기 ===
   container.innerHTML = `
-    <div class="filter-group">
-      <h3>🔍 검색</h3>
-      <input type="text" class="filter-search" placeholder="공연명/극장 검색..." />
+    <div class="sidebar-top">
+      <button type="button" class="sidebar-toggle" aria-expanded="true" aria-label="사이드바 접기">
+        <span class="sidebar-toggle-icon">‹</span>
+        <span class="sidebar-toggle-text">접기</span>
+      </button>
+      <h2 class="sidebar-title" aria-label="필터">
+        <span>필</span>
+        <span>터</span>
+      </h2>
     </div>
-
-    <div class="filter-group">
-      <h3>🎨 장르</h3>
-      <select class="filter-genre">
-        ${GENRE_OPTIONS.map((option) => `
-          <option value="${option.value}" data-color="${option.color}">
-            ${option.label}
-          </option>
-        `).join('')}
-      </select>
-      <div class="genre-legend">
-        ${GENRE_OPTIONS
-          .filter((option) => option.value)
-          .map((option) => `
-            <button
-              type="button"
-              class="genre-chip"
-              data-value="${option.value}"
-              title="${option.label}"
-            >
-              <span class="genre-swatch" style="background-color: ${option.color};"></span>
-              <span class="genre-label">${option.label}</span>
-            </button>
-          `).join('')}
+    <div class="sidebar-panel">
+      <div class="filter-group">
+        <h3>🔍 검색</h3>
+        <input type="text" class="filter-search" placeholder="공연명/극장 검색..." />
       </div>
-    </div>
 
-    <div class="filter-group">
-      <h3>📍 위치</h3>
-      <select class="filter-location">
-        <option value="">전체 시</option>
-      </select>
-    </div>
+      <div class="filter-group">
+        <h3>🎨 장르</h3>
+        <select class="filter-genre">
+          ${GENRE_OPTIONS.map((option) => `
+            <option value="${option.value}" data-color="${option.color}">
+              ${option.label}
+            </option>
+          `).join('')}
+        </select>
+        <div class="genre-legend">
+          ${GENRE_OPTIONS
+            .filter((option) => option.value)
+            .map((option) => `
+              <button
+                type="button"
+                class="genre-chip"
+                data-value="${option.value}"
+                title="${option.label}"
+              >
+                <span class="genre-swatch" style="background-color: ${option.color};"></span>
+                <span class="genre-label">${option.label}</span>
+              </button>
+            `).join('')}
+        </div>
+      </div>
 
-    <div class="filter-group">
-      <h3>👶 옵션</h3>
-      <label class="filter-check">
-        <input type="checkbox" class="filter-kids" />
-        <span>아동 공연만 보기</span>
-      </label>
-    </div>
+      <div class="filter-group">
+        <h3>📍 위치</h3>
+        <select class="filter-location">
+          <option value="">전체 시</option>
+        </select>
+      </div>
 
-    <button class="filter-reset">필터 초기화</button>
+      <div class="filter-group">
+        <h3>👶 옵션</h3>
+        <label class="filter-check">
+          <input type="checkbox" class="filter-kids" />
+          <span>아동 공연만 보기</span>
+        </label>
+      </div>
+
+      <button class="filter-reset">필터 초기화</button>
+    </div>
   `;
 
   // === 요소들 잡아두기 ===
+  const $toggle = container.querySelector('.sidebar-toggle');
+  const $toggleIcon = container.querySelector('.sidebar-toggle-icon');
+  const $toggleText = container.querySelector('.sidebar-toggle-text');
+  const $title = container.querySelector('.sidebar-title');
+  const $panel = container.querySelector('.sidebar-panel');
   const $search = container.querySelector('.filter-search');
   const $genre  = container.querySelector('.filter-genre');
   const $location = container.querySelector('.filter-location');
@@ -103,6 +121,22 @@ export function createSidebar(container, options = {}) {
       `).join('')}
     `;
     $location.value = filters.location;
+  }
+
+  function setCollapsed(collapsed) {
+    container.classList.toggle('collapsed', collapsed);
+    layout?.classList.toggle('sidebar-collapsed', collapsed);
+    $panel.hidden = collapsed;
+    $title.hidden = !collapsed;
+    if (layout) {
+      layout.style.gridTemplateColumns = collapsed ? '72px 1fr' : '260px 1fr';
+    }
+    container.style.paddingLeft = collapsed ? '8px' : '18px';
+    container.style.paddingRight = collapsed ? '8px' : '18px';
+    $toggle.setAttribute('aria-expanded', String(!collapsed));
+    $toggle.setAttribute('aria-label', collapsed ? '사이드바 펼치기' : '사이드바 접기');
+    $toggleIcon.textContent = collapsed ? '›' : '‹';
+    $toggleText.textContent = collapsed ? '열기' : '접기';
   }
 
   // === 이벤트 연결 ===
@@ -134,6 +168,10 @@ export function createSidebar(container, options = {}) {
     onChange(filters);
   });
 
+  $toggle.addEventListener('click', () => {
+    setCollapsed(!container.classList.contains('collapsed'));
+  });
+
   $kids.addEventListener('change', (e) => {
     filters.kidsOnly = e.target.checked;
     onChange(filters);
@@ -155,6 +193,7 @@ export function createSidebar(container, options = {}) {
 
   updateGenreSelectColor();
   updateGenreChipState();
+  setCollapsed(true);
 
   // === 외부에 노출할 API ===
   return {
@@ -166,5 +205,6 @@ export function createSidebar(container, options = {}) {
       }
       renderLocationOptions();
     },
+    setCollapsed,
   };
 }

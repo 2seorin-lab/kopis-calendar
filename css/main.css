@@ -25,6 +25,11 @@ h1 {
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 16px;
+  transition: grid-template-columns 0.25s ease;
+}
+
+.layout.sidebar-collapsed {
+  grid-template-columns: 72px 1fr;
 }
 
 .sidebar {
@@ -33,6 +38,13 @@ h1 {
   border-radius: 12px;
   padding: 18px;
   min-height: 200px;
+  overflow: hidden;
+  transition: padding 0.25s ease;
+}
+
+.sidebar.collapsed {
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .main-content {
