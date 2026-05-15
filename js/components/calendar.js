@@ -23,7 +23,10 @@ function getGenreColor(name) {
 
 export function createCalendar(container,options={}){
     const fullModal = createFullModal({ 
-      onItemClick: (p) => options.onPerformanceClick(p) });
+      onItemClick: (p) => {
+        fullModal.close();
+        options.onPerformanceClick(p);
+      } });
     const onMonthChange=options.onMonthChange || (()=>{}); // 부모가 넘겨주는 콜백 - 달이 바뀔 때마다 호출됨
     const onPerformanceClick  = options.onPerformanceClick  || (() => {}); // 공연 아이템 클릭 시 호출되는 콜백
     let current = new Date();  //현재 보고 있는 달
