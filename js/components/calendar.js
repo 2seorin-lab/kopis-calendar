@@ -1,5 +1,6 @@
 import { parseKopisDate } from '../api/kopis.js';
 import { fetchMonthlyWeatherMap } from '../api/weather.js';
+import { fetchLongTermWeather } from '../api/weatherlong.js';
 import { createFullModal } from './fullmodal.js';
 import { createCalendarGrid } from './calendarGrid.js';
 
@@ -19,6 +20,36 @@ const GENRE_COLORS = {
 
 function getGenreColor(name) {
   return GENRE_COLORS[name] || '#ffffff';   // 매칭 안 되면 기본 회색
+}
+
+function hasUsableShortWeather(weather) {
+  if (!weather) return false;
+
+  return !(
+    weather.label === '정보없음' &&
+    weather.icon === '-' &&
+    weather.temp === '--'
+  );
+}
+
+function mergeWeatherMap(shortMap, longMap) {
+  const merged = { ...longMap };
+
+  for (const key in shortMap) {
+    if (hasUsableShortWeather(shortMap[key])) {
+      merged[key] = {
+        ...longMap[key],
+        ...shortMap[key], // 단기예보에 실제 값이 있을 때만 우선 사용
+      };
+      continue;
+    }
+
+    if (!merged[key]) {
+      merged[key] = shortMap[key];
+    }
+  }
+
+  return merged;
 }
 
 export function createCalendar(container,options={}){
@@ -120,16 +151,22 @@ export function createCalendar(container,options={}){
 
     async function loadWeather() {
       try {
-        weatherByDay = await fetchMonthlyWeatherMap(
-          current.getFullYear(),
-          current.getMonth(),
-        );
+      const shortMap = await fetchMonthlyWeatherMap(
+        current.getFullYear(),
+        current.getMonth(),
+      );
+
+      const longMap = await fetchLongTermWeather(
+        current.getFullYear(),
+        current.getMonth(),
+      );
+
+      weatherByDay = mergeWeatherMap(shortMap, longMap);
       } catch (error) {
-        console.error('날씨 로딩 실패', error);
-        weatherByDay = {};
+      console.error('날씨 로딩 실패', error);
+      weatherByDay = {};
       }
     }
-
     render();
     queueMicrotask(async () => {
       await loadWeather();

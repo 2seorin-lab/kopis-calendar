@@ -95,6 +95,8 @@ function summarizeDayWeather(date, items) {
     };
   }
 
+  const minTempItem = dayItems.find((item) => item.category === 'TMN');
+  const maxTempItem = dayItems.find((item) => item.category === 'TMX');
   const tempItem = dayItems.find((item) => item.category === 'TMP' && item.fcstTime === '1200')
     || dayItems.find((item) => item.category === 'TMP');
   const skyItem = dayItems.find((item) => item.category === 'SKY' && item.fcstTime === '1200')
@@ -110,8 +112,20 @@ function summarizeDayWeather(date, items) {
   return {
     icon,
     label,
-    temp: tempItem ? `${tempItem.fcstValue}°` : '--',
+    temp: formatDailyTemp(
+      minTempItem?.fcstValue,
+      maxTempItem?.fcstValue,
+      tempItem?.fcstValue,
+    ),
   };
+}
+
+function formatDailyTemp(min, max, fallback) {
+  if (min != null && max != null) return `${min}°/${max}°`;
+  if (max != null) return `${max}°`;
+  if (min != null) return `${min}°`;
+  if (fallback != null) return `${fallback}°`;
+  return '--';
 }
 
 function pickWeatherDisplay(pty, sky) {
